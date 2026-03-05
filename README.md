@@ -2,6 +2,9 @@
 
 `Codex` 驱动的自进化网页框架
 
+## TODO
+- [ ] 适配 `claude code` 等更多平台
+
 ## 目录结构
 
 - `server.js`：后端
