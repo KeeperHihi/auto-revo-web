@@ -17,6 +17,12 @@
 
 ## 快速开始
 
+0. 务必保证本机的 `codex CLI` 可以使用
+
+配置教程见 [codex 配置教程](https://docs.right.codes/docs/rc_cli_config/codex.html)
+
+只需要将 `RightCode` 教程中的 `config.toml` 和 `auth.json` 两个文件按照你自己运营商的相关配置写好即可。
+
 1. 部署源码
    
 ```bash
