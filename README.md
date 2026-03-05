@@ -82,7 +82,7 @@ npm run dev
 终端执行：
 
 ```bash
-npm run cli-evolve --iterations=10
+npm run cli-evolve -- --iterations=10
 # 一般只传递 iterations 参数即可
 # 若未传 --prompt，会自动读取 prompts/user-prompt.md
 # 若该文件为空，且当前终端可交互，则会让你现场输入
