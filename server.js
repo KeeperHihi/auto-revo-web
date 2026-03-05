@@ -1003,20 +1003,6 @@ function wait(ms) {
     return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-function buildSseWriter(res) {
-    function send(payload) {
-        const data = typeof payload === 'string' ? { message: payload } : payload;
-        res.write(`data: ${JSON.stringify(data)}\n\n`);
-    }
-
-    function done() {
-        res.write('data: [DONE]\n\n');
-        res.end();
-    }
-
-    return { send, done };
-}
-
 function clampIterations(rawIterations, defaultIterations, maxIterations) {
     const parsed = Number(rawIterations);
     const fallback = Number(defaultIterations);
@@ -1249,67 +1235,7 @@ async function runCliEvolutionMode() {
     }
 }
 
-app.use(express.json({ limit: '1mb' }));
 app.use(express.static(path.join(APP_ROOT, 'public')));
-
-app.get('/api/status', async (req, res) => {
-    const config = await loadConfig();
-    res.json({
-        ok: true,
-        running: Boolean(activeRunId),
-        defaultIterations: config.evolution.defaultIterations,
-        maxIterations: config.evolution.maxIterations
-    });
-});
-
-app.post('/api/evolve', async (req, res) => {
-    const userPrompt = String(req.body?.prompt || '').trim();
-    if (!userPrompt) {
-        return res.status(400).json({ error: '缺少 prompt 参数' });
-    }
-
-    if (activeRunId) {
-        return res.status(409).json({ error: '已有进化任务在运行，请等待完成' });
-    }
-
-    res.setHeader('Content-Type', 'text/event-stream; charset=utf-8');
-    res.setHeader('Cache-Control', 'no-cache');
-    res.setHeader('Connection', 'keep-alive');
-
-    const runId = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-    activeRunId = runId;
-    const { send, done } = buildSseWriter(res);
-
-    let clientClosed = false;
-    req.on('close', () => {
-        clientClosed = true;
-    });
-
-    try {
-        await executeEvolutionJob({
-            userPrompt,
-            requestedIterations: req.body?.iterations,
-            sendUpdate: (message, extra = {}) => {
-                const payload = {
-                    message,
-                    loading: typeof extra.loading === 'boolean' ? extra.loading : true,
-                    runId,
-                    ...extra
-                };
-                send(payload);
-            },
-            shouldStop: () => clientClosed
-        });
-        done();
-    } catch (error) {
-        send({ message: `[ERROR] ${error.message}`, loading: false, status: 'failed', runId });
-        done();
-    } finally {
-        if (activeRunId === runId) {
-            activeRunId = null;
-        }
-    }
-});
 
 app.get('*', (req, res) => {
     res.sendFile(path.join(APP_ROOT, 'public', 'index.html'));
