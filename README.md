@@ -77,29 +77,15 @@ npm run dev
 
 ### 6. 启动自进化
 
-交互模式：
+强烈推荐把你对网站进化方向的描述放到 [prompts/user-prompt.md](prompts/user-prompt.md) 中，然后在启动时不需要显式传输 `--prompt` 参数，会直接读取该文件作为 `prompt`。
+
+终端执行：
 
 ```bash
-npm run cli-evolve
-# 会让你现场输入你希望网站进化的方向
-```
-
-传参模式：(推荐只使用此方式启动)
-
-```bash
-# 新建 run.sh，写入下列指令，记得修改你希望进化的方向和迭代次数
-npm run cli-evolve -- \
-    --prompt="一个支持多用户在线匹配对战的五子棋网页，特点是UI非常科幻、丝滑，给用户最爽的对局体验" \
-    --iterations=10
-```
-
-dry-run（仅校验流程，不执行 Codex，不修改仓库）：
-
-```bash
-npm run cli-evolve -- \
-    --prompt="做一个网站" \
-    --iterations=1 \
-    --dry-run
+npm run cli-evolve --iterations=10
+# 一般只传递 iterations 参数即可
+# 若未传 --prompt，会自动读取 prompts/user-prompt.md
+# 若该文件为空，且当前终端可交互，则会让你现场输入
 ```
 
 ## 常用指令

@@ -27,6 +27,7 @@ const express = loadExpressOrExit();
 const app = express();
 const APP_ROOT = __dirname;
 const CONFIG_FILE = path.join(APP_ROOT, 'config.json');
+const CLI_USER_PROMPT_FILE = 'prompts/user-prompt.md';
 
 let activeRunId = null;
 
@@ -357,6 +358,21 @@ async function loadSystemPrompt(config) {
             throw error;
         }
         throw new Error(`读取系统提示词失败: ${error.message}`);
+    }
+}
+
+async function loadCliUserPromptFromFile() {
+    const absolutePath = resolveLocalPathFromAppRoot(CLI_USER_PROMPT_FILE, 'CLI_USER_PROMPT_FILE');
+
+    try {
+        const content = await fs.readFile(absolutePath, 'utf8');
+        const text = String(content || '').trim();
+        return {
+            path: absolutePath,
+            text
+        };
+    } catch (error) {
+        throw new Error(`读取用户 Prompt 文件失败: ${error.message}`);
     }
 }
 
@@ -1195,8 +1211,16 @@ async function runCliEvolutionMode() {
         : config;
     let userPrompt = String(getCliArgValue('--prompt') || '').trim();
     if (!userPrompt) {
+        const { text: promptFromFile, path: promptFilePath } = await loadCliUserPromptFromFile();
+        if (promptFromFile) {
+            userPrompt = promptFromFile;
+            console.log(formatAutoEvolveConsoleLine(`[CLI] 未提供 --prompt，已从文件读取: ${promptFilePath}`));
+        }
+    }
+
+    if (!userPrompt) {
         if (!process.stdin.isTTY) {
-            throw new Error('终端模式未提供 --prompt，且当前不是交互终端');
+            throw new Error('终端模式未提供 --prompt，且 prompts/user-prompt.md 为空，当前也不是交互终端');
         }
         userPrompt = await askQuestion('请输入网站方向 Prompt: ');
     }
