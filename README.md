@@ -52,7 +52,7 @@ npm run dev
 # 然后打开本地 localhost:6161，测试网页是否能正常显示。
 ```
 
-5. 启动自进化（CLI）
+1. 启动自进化
 
 交互模式：
 
@@ -82,7 +82,7 @@ npm run cli-evolve -- \
 ## 常用指令
 
 - `npm run dev`：启动服务
-- `npm run cli-evolve`：CLI 触发进化
+- `npm run cli-evolve`：进化
 
 ## 运行流程
 
