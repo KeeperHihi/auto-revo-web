@@ -30,6 +30,73 @@ const CONFIG_FILE = path.join(APP_ROOT, 'config.json');
 
 let activeRunId = null;
 
+const TAG_COLOR_MAP = {
+    SYSTEM: '\x1b[36m',
+    AUTO: '\x1b[34m',
+    PROMPT: '\x1b[35m',
+    HEARTBEAT: '\x1b[2m',
+    GIT: '\x1b[33m',
+    ERROR: '\x1b[31m',
+    RECONNECT: '\x1b[93m',
+    CLI: '\x1b[96m',
+    'CODEX-PHASE': '\x1b[96m',
+    'CODEX-PROMPT': '\x1b[95m',
+    'CODEX-RESP': '\x1b[92m',
+    'CODEX-THINK': '\x1b[90m',
+    'CODEX-META': '\x1b[90m',
+    'CODEX-MCP': '\x1b[36m',
+    'CODEX-WARN': '\x1b[93m',
+    'CODEX-ERR': '\x1b[31m',
+    'CODEX-EXEC': '\x1b[94m',
+    'CODEX-STDOUT': '\x1b[37m',
+    'CODEX-STDERR': '\x1b[31m',
+    INFO: '\x1b[37m'
+};
+
+const ANSI_RESET = '\x1b[0m';
+
+function supportsAnsiColor() {
+    return Boolean(process.stdout.isTTY) && !process.env.NO_COLOR;
+}
+
+function colorize(text, colorCode) {
+    if (!colorCode || !supportsAnsiColor()) {
+        return text;
+    }
+    return `${colorCode}${text}${ANSI_RESET}`;
+}
+
+function parseTaggedMessage(rawMessage) {
+    const message = String(rawMessage || '');
+    const match = message.match(/^\[([A-Z0-9-]+)\]\s*(.*)$/);
+    if (!match) {
+        return {
+            hasTag: false,
+            tag: 'INFO',
+            body: message
+        };
+    }
+
+    return {
+        hasTag: true,
+        tag: match[1],
+        body: match[2] || ''
+    };
+}
+
+function formatAutoEvolveConsoleLine(message) {
+    const parsed = parseTaggedMessage(message);
+    const prefix = colorize('[AUTO-EVOLVE]', '\x1b[1;36m');
+
+    if (!parsed.hasTag) {
+        return `${prefix} ${parsed.body}`;
+    }
+
+    const tagColor = TAG_COLOR_MAP[parsed.tag] || TAG_COLOR_MAP.INFO;
+    const coloredTag = colorize(`[${parsed.tag}]`, tagColor);
+    return `${prefix} ${coloredTag} ${parsed.body}`;
+}
+
 function normalizeGitBranchName(branchName) {
     const raw = String(branchName || '').trim();
     return raw.replace(/^refs\/heads\//, '');
@@ -1045,24 +1112,24 @@ async function runCliEvolutionMode() {
     activeRunId = runId;
     const requestedIterations = getCliArgValue('--iterations') || config.evolution.defaultIterations;
 
-    console.log(`[CLI] 已启动终端自进化模式，runId=${runId}`);
-    console.log(`[CLI] 目标轮次=${requestedIterations}`);
-    console.log(`[CLI] 用户方向 Prompt=${userPrompt}`);
+    console.log(formatAutoEvolveConsoleLine(`[CLI] 已启动终端自进化模式，runId=${runId}`));
+    console.log(formatAutoEvolveConsoleLine(`[CLI] 目标轮次=${requestedIterations}`));
+    console.log(formatAutoEvolveConsoleLine(`[CLI] 用户方向 Prompt=${userPrompt}`));
 
     try {
         const summary = await executeEvolutionJob({
             userPrompt,
             requestedIterations,
             sendUpdate: (message) => {
-                console.log(message);
+                console.log(formatAutoEvolveConsoleLine(message));
             },
             shouldStop: () => false
         });
 
         if (summary.status === 'success') {
-            console.log(`[CLI] 完成：执行 ${summary.executedIterations} 轮，总变更文件数=${summary.changedFiles}`);
+            console.log(formatAutoEvolveConsoleLine(`[CLI] 完成：执行 ${summary.executedIterations} 轮，总变更文件数=${summary.changedFiles}`));
         } else {
-            console.log(`[CLI] 已停止：执行 ${summary.executedIterations} 轮，总变更文件数=${summary.changedFiles}`);
+            console.log(formatAutoEvolveConsoleLine(`[CLI] 已停止：执行 ${summary.executedIterations} 轮，总变更文件数=${summary.changedFiles}`));
         }
     } finally {
         if (activeRunId === runId) {
