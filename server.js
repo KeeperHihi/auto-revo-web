@@ -617,6 +617,25 @@ function classifyCodexStreamLine(line, source, state) {
         return `[CODEX-META] ${content}`;
     }
 
+    if (/^mcp\b/i.test(content)) {
+        return `[CODEX-MCP] ${content}`;
+    }
+
+    if (/^(warn(ing)?|caution)\b/i.test(content)) {
+        return `[CODEX-WARN] ${content}`;
+    }
+
+    if (/^(error|fatal|exception)\b/i.test(content)) {
+        return `[CODEX-ERR] ${content}`;
+    }
+
+    if (source === 'stderr' && /(\berror\b|\bfatal\b|\bexception\b)/i.test(content)) {
+        return `[CODEX-ERR] ${content}`;
+    }
+
+    if (state.phase === 'user') {
+        return `[CODEX-PROMPT] ${content}`;
+    }
     if (state.phase === 'thinking') {
         return `[CODEX-THINK] ${content}`;
     }
