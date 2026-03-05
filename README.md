@@ -26,12 +26,23 @@
 1. 部署源码
    
 ```bash
-# 只需要 main 分支，demo 分支为生成的样例
+# 只需要 main 分支，demo 分支为生成的样例，想查看者也可以一起 clone 下来看看 
 git clone --branch main --single-branch https://github.com/KeeperHihi/auto-revo-web.git
 ```
-然后要**新建**一个你自己的 `github` 仓库，创建 `main` 分支，把本项目源码传上去。
+**新建**一个你自己的 `github` 仓库，比如叫 demo
 
-2. 安装依赖
+然后把本项目目录下的 `.git` 目录删掉，进入终端，依次执行：
+```bash
+git init
+git remote add origin https://github.com/xxx/demo.git
+git branch -M main
+git add .
+git commit -m "init"
+git push origin main
+```
+
+
+1. 安装依赖
 
 ```bash
 # 终端进入项目根目录，然后
