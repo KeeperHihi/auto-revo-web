@@ -1,0 +1,39 @@
+{
+  "server": {
+    "port": 6161
+  },
+  "evolution": {
+    "defaultIterations": 3,
+    "maxIterations": 1000,
+    "intervalMs": 30000,
+    "appendIterationContext": true,
+    "systemPromptFile": "prompts/sys-prompt.md"
+  },
+  "llmAccess": {
+    "url": "https://529961.com/v1/responses",
+    "apiKey": "sk-1c2bdd8567f9bd8e0ea95e117d85c14bda8e25787bdf51665a4b66de4668846d",
+    "model": "GPT-5.2"
+  },
+  "codex": {
+    "enabled": true,
+    "dryRun": false,
+    "command": "codex",
+    "model": "gpt-5.3-codex-xhigh",
+    "profile": "",
+    "fullAuto": false,
+    "dangerouslyBypassApprovalsAndSandbox": true,
+    "timeoutMs": 1800000,
+    "reconnectingRounds": 10,
+    "environment": {},
+    "extraArgs": [
+      "-c",
+      "model_reasoning_effort=\"xhigh\""
+    ],
+    "additionalWritableDirs": [],
+    "autoGitCommit": true,
+    "autoGitPush": true,
+    "gitRemote": "origin",
+    "gitBranch": "demo",
+    "gitCommitPrefix": "Codex Evolution:"
+  }
+}
