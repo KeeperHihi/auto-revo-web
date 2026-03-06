@@ -10,8 +10,9 @@ from auto_evolution.workflow import run_evolution
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="自动进化脚本入口（在 webs/<siteName> 独立仓库中执行迭代）",
-        usage="python3 evolution.py [--site 站点名] [--iteration 轮次] [--prompt 创意] [--dry-run]",
+        usage="python evolution.py [--site 站点名] [--iterations 轮次] [--prompt 创意] [--dry-run]",
         add_help=False,
+        allow_abbrev=False,
     )
     parser._positionals.title = "位置参数"
     parser._optionals.title = "可选参数"
@@ -19,8 +20,6 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--site", help="覆盖 config.json 中的 siteName（目标站点目录名）")
     parser.add_argument(
         "--iterations",
-        "--iteration",
-        dest="iterations",
         type=int,
         help="覆盖 config.json 中的迭代轮次",
     )
@@ -28,7 +27,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--dry-run",
         action="store_true",
-        help="仅演练流程与提示词组装，不调用 Codex，也不执行 git 提交/推送",
+        help="仅做本地只读演练，不调用 Codex、不执行 autoGitInit、不切换分支、不做远端检查",
     )
     return parser.parse_args()
 
