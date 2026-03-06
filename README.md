@@ -27,7 +27,7 @@
 - `python`，基础环境即可
 - `git`
 - 本机必须配置好 `codex CLI`
-- （非常建议）若要启用 `autoGitInit`，还需安装 `gh` 并登录：`gh auth login`，便于自动化 `git` 操作
+- （非常建议）安装 `gh` 并登录：`gh auth login`，便于自动化 `git` 操作
 
 ## 快速开始
 
@@ -38,22 +38,22 @@
 只需要将 `RightCode` 教程中的 `config.toml` 和 `auth.json` 两个文件按照你自己运营商的相关配置写好即可。
 
 ### 1. 准备配置文件
-
+在项目根目录执行：
 ```bash
 cp config.template.json config.json
 ```
 `config.json` 中要修改的字段：
-- `siteName` 你希望进化网站的仓库名。
-- `iterations` 你希望进化的迭代次数。
-- `autoGitInit` 是否愿意自动化创建仓库（默认为 `false`，必须 `gh` 登录才能为 `true`）
-- (可选) `llmAccess` 如果你希望进化过程中可以加入调用大模型的功能，请提供一个可调用的大模型配置，其中 `apiKey` 会以环境变量的形式加载，无需担心泄漏问题。
+- `siteName`: 你希望进化网站的仓库名。
+- `iterations`: 你希望进化的迭代次数。
+- (推荐) `autoGitInit`: 是否愿意自动化创建仓库（默认为 `false`，必须 `gh` 登录才能为 `true`，建议改为 `true`）
+- (可选) `llmAccess`: 如果你希望进化过程中可以加入调用大模型的功能，请提供一个可调用的大模型配置，其中 `apiKey` 会以环境变量的形式加载，无需担心泄漏问题。
 
 ### 2. 准备承载网站的空仓库（若已登录 `gh` 并配置 `autoGitInit=True` 则可跳过本节）
 
-在 `github` 上创建一个空仓库，假设仓库名为 <YOUR_REPO_NAME>，然后在项目根目录执行：
+在 `github` 上创建一个空仓库，然后在项目根目录执行：
 ```bash
-mkdir -p webs/<YOUR_REPO_NAME>
-cd webs/<YOUR_REPO_NAME>
+mkdir -p webs/<你的空仓库名>
+cd webs/<你的空仓库名>
 git init
 git checkout -B main
 git remote add origin <你的空仓库地址>
@@ -65,7 +65,7 @@ git remote add origin <你的空仓库地址>
 cp prompts/sys-prompt.template.md prompts/sys-prompt.md
 cp prompts/user-prompt.template.md prompts/user-prompt.md
 ```
-可以改写 `prompts/sys-prompt.md` 更加适配你的需求，
+可以改写 `prompts/sys-prompt.md` 更加适配你的需求。
 
 记得填写你的创意 `idea` 到 `prompts/user-prompt.md`。
 
@@ -81,7 +81,7 @@ python evolution.py
 python evolution.py --iterations 10 # 传入迭代次数
 python evolution.py --site <YOUR_REPO_NAME> # 传入仓库名
 python evolution.py --prompt "做一个极简但高级的作品集网站" # 传入prompt，更推荐用 user-prompt.md 传输，不传入 prompt 参数即自动读取 user-prompt.md
-python evolution.py --dry-run # 只做本地只读校验（不调用 Codex、不触发 autoGitInit、不切换分支、不做远端检查）
+python evolution.py --dry-run # 测试本地流程是否能跑通
 ```
 
 ## 配置字段（`config.json`）
