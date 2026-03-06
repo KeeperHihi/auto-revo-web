@@ -49,6 +49,7 @@ cp config.template.json config.json
 `config.json` 中要修改的字段：
 - `siteName` 你希望进化网站的仓库名。
 - `iterations` 你希望进化的迭代次数。
+- `autoGitInit` 是否愿意自动化创建仓库（默认为 `false`，必须 `gh` 登录才能为 `true`）
 - (可选) `llmAccess` 如果你希望进化过程中可以加入调用大模型的功能，请提供一个可调用的大模型配置，其中 `apiKey` 会以环境变量的形式加载，无需担心泄漏问题。
 
 ### 2. 准备站点空仓库（若已登录 `gh` 并配置 `autoGitInit=True` 则可跳过本节）：
@@ -63,7 +64,14 @@ git checkout -B main
 git remote add origin <你的空仓库地址>
 ```
 
-### 3. 填写你的创意 `idea` 到 `prompts/user-prompt.md`。
+### 3. 设置好 prompts
+```bash
+cp prompts/sys-prompt.template.md prompts/sys-prompt.md
+cp prompts/user-prompt.template.md prompts/user-prompt.md
+```
+可以改写 `prompts/sys-prompt.md` 更加适配你的需求，
+
+记得填写你的创意 `idea` 到 `prompts/user-prompt.md`。
 
 ### 4. 回到项目根目录，启动进化：
 
