@@ -12,6 +12,7 @@ from auto_evolution.git_tools import (
     commit_and_push_changes,
     count_changed_files,
     ensure_branch_ready,
+    ensure_project_is_latest,
     ensure_remote_ready,
     ensure_workspace_is_git_repo,
     inspect_workspace_state,
@@ -35,6 +36,8 @@ def run_evolution(
     prompt_override: str | None,
     dry_run_override: bool,
 ) -> int:
+    ensure_project_is_latest(APP_ROOT, remote_name="origin", branch_name="main")
+
     config = load_config(CONFIG_FILE)
 
     if site_override:

@@ -46,6 +46,62 @@ def run_gh(args: list[str], timeout_seconds: int = 60) -> subprocess.CompletedPr
     return run_command(["gh", *args], timeout_seconds=timeout_seconds)
 
 
+def ensure_project_is_latest(
+    project_root: Path,
+    remote_name: str = "origin",
+    branch_name: str = "main",
+) -> None:
+    branch = normalize_branch_name(branch_name) or "main"
+    root = project_root.resolve()
+    top_level = detect_repo_top_level(root)
+    if top_level != root:
+        log("[GIT] 当前目录不是项目仓库根目录，跳过项目更新检查")
+        return
+
+    remote_result = run_git(root, ["remote", "get-url", remote_name], timeout_seconds=30)
+    if remote_result.returncode != 0:
+        log(f"[GIT] 未检测到远端 {remote_name}，跳过项目更新检查")
+        return
+
+    status_result = run_git(root, ["status", "--porcelain"], timeout_seconds=30)
+    if status_result.returncode != 0:
+        details = extract_tail(status_result.stderr or status_result.stdout, 300)
+        log(f"[WARN] 无法读取项目仓库状态，跳过项目更新检查：{details}")
+        return
+    if (status_result.stdout or "").strip():
+        log("[GIT] 检测到项目仓库有未提交改动，跳过自动 git pull")
+        return
+
+    fetch_result = run_git(root, ["fetch", remote_name, branch], timeout_seconds=120)
+    if fetch_result.returncode != 0:
+        details = extract_tail(fetch_result.stderr or fetch_result.stdout, 400)
+        raise RuntimeError(f"项目启动前检查远端更新失败：{details}")
+
+    local_head = run_git(root, ["rev-parse", "HEAD"], timeout_seconds=30)
+    remote_head = run_git(root, ["rev-parse", f"{remote_name}/{branch}"], timeout_seconds=30)
+    if local_head.returncode != 0 or remote_head.returncode != 0:
+        details = extract_tail(
+            (local_head.stderr or local_head.stdout or "")
+            + "\n"
+            + (remote_head.stderr or remote_head.stdout or ""),
+            400,
+        )
+        raise RuntimeError(f"项目启动前读取版本信息失败：{details}")
+
+    local_sha = (local_head.stdout or "").strip()
+    remote_sha = (remote_head.stdout or "").strip()
+    if local_sha == remote_sha:
+        log("[GIT] 项目仓库已是最新版本")
+        return
+
+    log(f"[GIT] 检测到项目仓库有更新，执行：git pull {remote_name} {branch}")
+    pull_result = run_git(root, ["pull", remote_name, branch], timeout_seconds=180)
+    if pull_result.returncode != 0:
+        details = extract_tail(pull_result.stderr or pull_result.stdout, 800)
+        raise RuntimeError(f"项目启动前自动拉取更新失败：{details}")
+    log("[GIT] 项目仓库更新完成")
+
+
 def ensure_gh_cli_ready() -> None:
     if shutil.which("gh") is None:
         raise RuntimeError(
