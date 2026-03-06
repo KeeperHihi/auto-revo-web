@@ -1,5 +1,5 @@
 {
-  "siteName": "demo-site",
+  "siteName": "demo",
   "iterations": 3,
   "intervalSeconds": 30,
   "appendIterationContext": true,
@@ -21,6 +21,11 @@
       "-c",
       "model_reasoning_effort=\"xhigh\""
     ],
-    "dryRun": false
+    "dryRun": false,
+    "autoGitCommit": true,
+    "autoGitPush": true,
+    "gitRemote": "origin",
+    "gitBranch": "main",
+    "gitCommitPrefix": ""
   }
 }
